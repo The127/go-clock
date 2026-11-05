@@ -22,6 +22,7 @@
             pkgs.govulncheck
             pkgs.just
             pkgs.lefthook
+            pkgs.reuse
           ];
           shellHook = ''
             lefthook install >/dev/null

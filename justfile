@@ -18,5 +18,9 @@ fmt:
 vuln:
     govulncheck ./...
 
+# Check that every file has license and copyright information.
+reuse:
+    reuse lint
+
 # Run every check that CI runs.
-ci: lint test vuln
+ci: lint test vuln reuse

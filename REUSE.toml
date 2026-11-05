@@ -1,0 +1,7 @@
+version = 1
+SPDX-PackageName = "go-clock"
+
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "Copyright 2025 The127"
+SPDX-License-Identifier = "MIT"
