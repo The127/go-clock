@@ -1,45 +1,53 @@
+// Package clock tells the time through an interface, so tests can set it.
 package clock
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-// Service defines an interface for retrieving the current time.
+// Service tells the current time.
 type Service interface {
 	Now() time.Time
 }
 
-// TimeSetterFn defines a function type used to update a time value in a specific context or object.
+// TimeSetterFn sets the time that a mock clock returns.
 type TimeSetterFn func(time.Time)
 
-// mockClock is a type that implements the Service interface for mocking time-related functionality.
 type mockClock struct {
+	mu  sync.Mutex
 	now time.Time
 }
 
-// Now returns the current mocked time stored in the mockClock instance.
 func (m *mockClock) Now() time.Time {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	return m.now
 }
 
-// NewMockClock creates a mock Service with a specified initial time and returns it along with a function to update the time.
-func NewMockClock(now time.Time) (Service, TimeSetterFn) {
-	service := mockClock{
-		now: now,
-	}
+func (m *mockClock) set(now time.Time) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	return &service, func(t time.Time) {
-		service.now = t
-	}
+	m.now = now
 }
 
-// clockService is a private implementation of the Service interface that provides the current time.
+// NewMockClock returns a clock that always returns now, and a function that
+// changes the time it returns. Both are safe to call from several goroutines.
+func NewMockClock(now time.Time) (Service, TimeSetterFn) {
+	m := &mockClock{now: now}
+
+	return m, m.set
+}
+
 type systemClock struct{}
 
-// NewSystemClock creates and returns a new instance of a Service implementation for handling time-related operations with the system clock using time.Now().
+// NewSystemClock returns a clock that returns time.Now.
 func NewSystemClock() Service {
-	return &systemClock{}
+	return systemClock{}
 }
 
-// Now returns the current local time using the system clock.
-func (c *systemClock) Now() time.Time {
+func (systemClock) Now() time.Time {
 	return time.Now()
 }
