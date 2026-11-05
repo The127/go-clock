@@ -10,8 +10,11 @@ permissions:
 
 jobs:
   sign-off:
-    # Dependabot can't sign off its commits.
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    # Bots can't certify the Developer Certificate of Origin, and the release
+    # App's commits only raise the version and write the changelog.
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'the127-release[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
